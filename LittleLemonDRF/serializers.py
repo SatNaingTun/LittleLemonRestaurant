@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import serializers
 from .models import MenuItem, Category
 
@@ -20,4 +22,4 @@ class MenuItemSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'price', 'inventory', 'category', 'category_id', 'stock', 'price_after_tax']
 
     def calculate_tax(self, obj):
-        return obj.price * 1.1  # Assuming a 10% tax rate
+        return obj.price * Decimal('1.1')  # Assuming a 10% tax rate

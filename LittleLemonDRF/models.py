@@ -1,31 +1,54 @@
 from django.db import models
+from django.contrib.auth.models import User
 
-# Create your models here.
 class Category(models.Model):
-    # The 'slug' attribute using SlugField
     slug = models.SlugField()
+    title = models.CharField(max_length=255, db_index=True)
 
-    # The 'title' attribute with a max length of 255
-    title = models.CharField(max_length=255)
-
-    # A third attribute (e.g., description) to complete the set
-    description = models.TextField(blank=True, null=True)
-
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
-
 class MenuItem(models.Model):
-    # Title with a max length of 225
-    title = models.CharField(max_length=225)
+    title = models.CharField(max_length=255, db_index=True)
+    # Changed decimal_digits to decimal_places
+    price = models.DecimalField(max_digits=6, decimal_places=2, db_index=True)
+    featured = models.BooleanField(db_index=True)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT)
 
-    # Price handling up to 9999.99
+    def __str__(self) -> str:
+        return self.title
+
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    menuitem = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
+    quantity = models.SmallIntegerField()
+    # Changed decimal_digits to decimal_places
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
     price = models.DecimalField(max_digits=6, decimal_places=2)
 
-    # Inventory count using a small integer field
-    inventory = models.SmallIntegerField()
+    class Meta:
+        unique_together = ('menuitem', 'user')
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    delivery_crew = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        related_name="delivery_crew", 
+        null=True
+    )
+    status = models.BooleanField(db_index=True, default=0)
+    # Changed decimal_digits to decimal_places
+    total = models.DecimalField(max_digits=6, decimal_places=2)
+    date = models.DateField(db_index=True, auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.title} - ${self.price}"
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    menuitem = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
+    quantity = models.SmallIntegerField()
+    # Changed decimal_digits to decimal_places
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    class Meta:
+        unique_together = ('order', 'menuitem')

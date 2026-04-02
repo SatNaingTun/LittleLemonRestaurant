@@ -1,18 +1,36 @@
 from django.urls import path
-from . import views
 
-from rest_framework.authtoken.views import obtain_auth_token
+from .endpoints.menu_views import MenuItemView, SingleMenuItemView
+from .endpoints.group_views import GroupUserView, GroupUserDeleteView
+from .endpoints.cart_views import CartView
+from .endpoints.order_views import OrderView, SingleOrderView
+from .endpoints.user_views import CurrentUserView,UserRegistrationView
+from .endpoints.category_views import CategoryView
 
 urlpatterns = [
-    path('category', views.CategoriesView.as_view()),
-    path('menu-items/', views.MenuItemsView.as_view()),
-    path('menu-items/<int:pk>', views.MenuItemDetailView.as_view()),
-    path('secret', views.secret),
-    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
-    path('me/', views.me, name='me'),
-    path('manager-view/', views.manager_view, name='manager_view'),
-    path('throttle-check/', views.throttle_check, name='throttle_check'),
-    path('throttle-check-auth/', views.throttle_check_auth, name='throttle_check_auth'),
-    path('groups/manager/users',views.admin_only_view, name='admin_only_view'),
+    
+    # Users
+    path('users', UserRegistrationView.as_view()),
+    path('users/users/me/', CurrentUserView.as_view()),
+    
+    # Categories
+    path('categories/', CategoryView.as_view()),
+    path('categories/<int:pk>', CategoryView.as_view()),
 
+    # Menu Items
+    path('menu-items', MenuItemView.as_view()),
+    path('menu-items/<int:pk>', SingleMenuItemView.as_view()),
+
+    # User Group Management
+    path('groups/manager/users', GroupUserView.as_view()),
+    path('groups/manager/users/<int:pk>', GroupUserDeleteView.as_view()),
+    path('groups/delivery-crew/users', GroupUserView.as_view()),
+    path('groups/delivery-crew/users/<int:pk>', GroupUserDeleteView.as_view()),
+
+    # Cart Management
+    path('cart/menu-items', CartView.as_view()),
+
+    # Order Management
+    path('orders', OrderView.as_view()),
+    path('orders/<int:pk>', SingleOrderView.as_view()),
 ]
